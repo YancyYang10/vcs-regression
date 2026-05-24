@@ -1,0 +1,35 @@
+# Test Case List for Regression Simulation
+# Format: tc=<name> mode=<mode> [times=N] [seed=N] [other_args]
+#
+# Mandatory fields:
+#   tc    - Test case name (matches UVM_TESTNAME)
+#   mode  - Simulation mode (determines compile options, shared among same mode)
+#
+# Optional fields:
+#   times - Number of times to repeat (default: 1)
+#   seed  - Random seed (default: auto-generated)
+#   udc   - User-defined compile options
+#   udr   - User-defined run options
+#
+# Lines starting with # are comments, empty lines are ignored.
+
+# Basic sanity test
+tc=tc_sanity  		mode=rtl_sim 	times=2
+tc=tc_burst_fixed 	mode=rtl_sim 	times=1
+# Write transaction tests
+#tc=tc_write mode=rtl_sim udr=+scb_en=on times=1
+#tc=tc_write_burst mode=rtl_sim udr=+scb_en=on times=1
+
+# Read transaction tests
+#tc=tc_read mode=rtl_sim udr=+scb_en=on times=1
+#tc=tc_read_burst mode=rtl_sim udr=+scb_en=on times=1
+
+# Random test with fixed seed for reproducibility
+#tc=tc_random mode=rtl_sim seed=12345 times=1
+
+# Full verification with scoreboard
+#tc=tc_full mode=rtl_sim udr=+scb_en=on+check_en=on times=3
+
+# Gate-level simulation (different mode)
+# tc=tc_sanity mode=gate_sim times=1
+# tc=tc_full mode=gate_sim udr=+scb_en=on times=1
