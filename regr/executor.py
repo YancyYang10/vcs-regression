@@ -21,6 +21,20 @@ from .status_tracker import StatusTracker
 from .utils import format_duration
 
 
+def case_identity(case: TestCase) -> str:
+    """Build a unique, human-readable key for a test case.
+
+    Entries may share the same UVM test name (tc) and differ only by mode or
+    by extra make arguments (e.g. sc=<C case> for SoC regressions). Using tc
+    alone as the results-dictionary key silently collapses those entries, so
+    the summary/HTML report undercounts. Include mode and extra args here.
+    """
+    extra = " ".join(
+        f"{k}={v}" for k, v in sorted(case.extra_args.items()) if str(v).strip()
+    )
+    return f"{case.tc} [{case.mode}]" + (f" {extra}" if extra else "")
+
+
 @dataclass
 class RunResult:
     """Result of a single simulation run.
@@ -583,7 +597,8 @@ class Executor:
             report_path: Path to HTML report file
 
         Returns:
-            Dictionary mapping tc name to CaseResult
+            Dictionary mapping unique case identity (see case_identity) to
+            CaseResult
         """
         results = {}
         self._total_count = sum(case.times for case in cases)
@@ -654,12 +669,13 @@ class Executor:
                         break
 
                     case = self._running_futures[future]
+                    key = case_identity(case)
                     try:
                         case_result = future.result()
-                        results[case.tc] = case_result
+                        results[key] = case_result
                     except Exception as e:
                         self.logger.error("Failed to execute %s: %s", case.tc, e)
-                        results[case.tc] = CaseResult(
+                        results[key] = CaseResult(
                             tc=case.tc,
                             mode=case.mode,
                             times=case.times
